@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breath Together</title>
+    <link rel="stylesheet" href="clean.css">
+</head>
+<body>
+    <header>
+        <div class="background"></div>
+        <div class="nav-left">
+            <a href="main.html"><button class="nav-button" id="info-button">Home</button></a>
+            <button class="nav-button" id="how-button">How to Play</button>
+        </div>
+        <h1 class="main-title">Clean Together</h1>
+        <div class="nav-right">
+            <button class="nav-button" id="music-button">Music</button>
+        </div>
+    </header>
+    
+    <div id="container">
+
+        <div id="controler">
+            <div id="cleanAndNext">
+            <button id="cleanCanvas" onclick="clearCanvas()">Clear Canvas</button>
+            <button id="nextImage" onclick="changeImage()">Next Image</button>
+            </div>
+            <div id="currentTool">
+                <div style="margin: 1vh;position: fixed;">Current Tool</div>
+                <div id="currentImage">
+                <img id="currentToolImage" height="90%" src="image/scraper.png">
+                </div>
+            </div>
+        </div>
+
+        <div id="productcontainer">
+        <div id="canvas-container">
+            <canvas id="canvas"  width="500" height='500'></canvas>
+            <div id="loading"><div>Loading...</div></div>
+        </div>
+        <div id="blockText"></div>
+        </div>
+
+    </div>
+
+    <div id="sizecontro">
+   
+        <div class="tool" id="brush3"  style="width: 9vw;margin-left: 9vw;margin-top: 6vh;transform:rotate(10deg);">
+        <div class="toolnumber"></div>
+        <img style="width: 100%;" src="image/too2.png">
+        <div class="overlay">Brush3</div>
+        </div>
+
+        
+
+        <div class="tool" id="brush1"  style="width: 6vw;right: 0.5vw;transform: rotate(-15deg);margin-top: 0vh;">
+            <div class="toolnumber"></div>
+            <img style="width: 100%;"  src="image/too4.png">
+            <div class="overlay">Brush1</div>
+        </div>
+        
+        <div class="tool" id="mop1" style="width: 15vw;right: -1vw;bottom: -2vh;">
+            <div class="toolnumber"></div>
+            <img style="width: 100%;" src="image/too5.png">
+            <div class="overlay">mop</div>
+        </div>
+        
+        <div class="tool" id="scraper"  style="width: 16vw;left: -5vw;transform: rotate(-50deg);margin-top: 1vh;">
+            <div class="toolnumber"></div>
+            <img style="width: 100%;"  src="image/scraper.png">
+            <div class="overlay">scraper</div>
+        </div>
+
+        <div class="tool" id="tower"  style="width: 12vw;margin-left: 0vw;bottom: 4vh;transform: rotate(-40deg);">
+        <img style="width: 100%;" src="image/too3.png">
+        <div class="overlay">towel</div>
+        </div>
+
+        <div class="tool" id="brush2"  style="width: 6vw;margin-left: 11vw;margin-top: 25vh;transform: rotate(0deg);">
+            <img style="width: 100%;" src="image/sprayer2.png">
+            <div class="overlay">Sprayer</div>
+        </div>
+
+        <div class="tool" id="sponge2"  style="width: 9vw;left: 0vw;bottom: 20vh;transform: rotate(-10deg);">
+            <img style="width: 100%;" src="image/sponge.png">
+            <div class="overlay">Sponge</div>
+            </div>
+    </div>
+
+    
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.2/tinycolor.min.js"></script>
+    <script src="js/tools.js"></script>
+    
+
+  <script >
+    const firebaseConfig = {
+    apiKey: "AIzaSyAgf20hMxaQ8pdfdzosKZ1ObwRlKqPOPKk",
+    authDomain: "domestic-c3b45.firebaseapp.com",
+    projectId: "domestic-c3b45",
+    storageBucket: "domestic-c3b45.appspot.com",
+    messagingSenderId: "634955558128",
+    appId: "1:634955558128:web:1ea4cd6b7724df6490e635",
+    measurementId: "G-L0SQYVM2EE"
+    };
+
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const storage = firebase.storage();
+    const firestore = firebase.firestore();
+
+    const description = document.getElementById("blockText");
+    const loading = document.getElementById("loading");
+
+    const uploadCanvasImage = () => {
+
+        if (currentTool === "bubble") {
+            switchTool("drawing");           
+        }
+        loading.style.display = "block"; 
+        canvas.classList.add("lookblur"); 
+        const descriText = description.innerHTML;
+   
+
+        canvas.toBlob((blob) => {
+    
+        if (!blob) {
+            console.error("Canvas is empty or conversion failed!");
+            return;
+        }
+
+        fileName = "canvas_" + Math.round(Math.random() * 9999) + ".png"; 
+
+        const storageRef = storage.ref().child("myimages"); 
+        const folderRef = storageRef.child(fileName);
+        const uploadTask = folderRef.put(blob); 
+
+        uploadTask.on(
+            "state_changed",
+            null, 
+            (error) => {
+                console.error("Upload failed:", error);
+            },
+            () => {
+            
+            storage
+              .ref("myimages")
+              .child(fileName)
+              .getDownloadURL()
+              .then((url) => {
+                // console.log("URL", url); // 
+                firestore.collection("images").add({
+                  url: url,
+                  description: descriText,
+                  //createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                }).then(() => {
+               
+                  alert("Image uploaded successfully");
+                  loading.style.display = "none";
+                  window.location.href = "Pages/wishlist.html";
+                }).catch((error) => {
+                  console.error("Error storing description:", error);
+                  loading.style.display = "none"; 
+                  
+                });
+              });
+          }
+        );
+            
+
+        }, "image/png");
+  };
+
+    let fileName; 
+    let uploadedFileName;
+
+    var startingText = `
+        Wash up!
+        말끔하게 씻어내보아요.
+        `
+    function spantext(texblock){
+        var separateLines = texblock.match(/[^\r\n]+/g);
+        var blockTextHTML = '';
+        for(var i = 0; i< separateLines.length; i++){
+            var splitText = separateLines[i].split(' ');
+            for(var j=0; j<splitText.length; j++){
+                blockTextHTML = blockTextHTML + '<span>' + splitText[j] +  ' </span>'
+            }
+            blockTextHTML = blockTextHTML + '<br>'
+        }
+ 
+        blockText.innerHTML = blockTextHTML;
+    }
+
+    spantext(startingText);
+
+    var spans = document.querySelectorAll('span');
+    var bottlecolor = '#a4c3e7'
+    spans.forEach(function(span){
+    span.addEventListener('click',function(){
+       span.style.color = bottlecolor;
+       span.style.fontFamily = 'tiny280';
+       span.style.fontSize = '15pt';
+       span.style.filter = 'blur(1px)';
+   })
+})
+
+
+    const canvas = document.getElementById("canvas");
+    const context = canvas.getContext("2d",{ willReadFrequently: true });
+
+    function addImage(src){
+        const image = new Image();
+        image.src = src; 
+        image.onload = () => {
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        };
+    }
+    
+    
+    let currentBg='image/product/dental.png';
+   
+    
+    window.onload = () => {
+        switchTool("drawing");
+        addImage('image/product/dental.png');
+        canvas.width =window.innerHeight*0.9;
+        canvas.height = window.innerHeight*0.9;
+    };
+
+    
+    let isEnabled = false; 
+    
+
+    let currentTool = null; 
+    let isDrawingToolEnabled = false; 
+    let isSmudgeToolEnabled = false; 
+    let isBubbleToolEnabled = false; 
+    let isBrushToolEnabled = false; 
+    let isMopBrushEnabled = false; 
+    let isSliceStrokeEnabled = false; 
+    let isSprayToolEnabled = false; 
+
+
+    var currentImage = document.getElementById("currentToolImage");
+    
+    
+
+    document.getElementById("scraper").addEventListener("click", () => switchTool("drawing"));
+    document.getElementById("tower").addEventListener("click", () => switchTool("smudge"));
+    document.getElementById("sponge2").addEventListener("click", () => switchTool("bubble"));
+    document.getElementById("brush1").addEventListener("click", () => switchTool("brush"));
+    document.getElementById("mop1").addEventListener("click", () => switchTool("mop")); 
+    document.getElementById("brush3").addEventListener("click", () => switchTool("slice")); 
+    document.getElementById("brush2").addEventListener("click", () => switchTool("spray")); 
+
+
+    function clearCanvas() {
+        
+        if (currentTool === "bubble") {
+            switchTool("drawing");
+            
+            
+        }
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        addImage(currentBg);
+
+    }
+
+ const images = ['brain.png', '4.png', 'dental.png']; // 이미지 배열
+const words = [
+    "Brain: Let's clean your mind.",
+    "Four: Cleanliness is next to godliness.",
+    "Dental: Keep your teeth sparkling!"
+]; // 이미지에 대응하는 텍스트 배열
+
+function spantext(texblock) {
+    var separateLines = texblock.match(/[^\r\n]+/g);
+    var blockTextHTML = '';
+    for (var i = 0; i < separateLines.length; i++) {
+        var splitText = separateLines[i].split(' ');
+        for (var j = 0; j < splitText.length; j++) {
+            blockTextHTML = blockTextHTML + '<span>' + splitText[j] + ' </span>';
+        }
+        blockTextHTML = blockTextHTML + '<br>';
+    }
+
+    blockText.innerHTML = blockTextHTML;
+}
+
+function changeImage() {
+    const imageIndex = Math.floor(Math.random() * images.length); // 랜덤 이미지 인덱스 선택
+    currentBg = 'image/product/' + images[imageIndex]; // 새 배경 이미지 경로 설정
+
+    // 텍스트 업데이트
+    if (words[imageIndex]) {
+        spantext(words[imageIndex]);
+    }
+
+    // span 스타일 다시 추가
+    const spans = document.querySelectorAll('span');
+    spans.forEach(function (span) {
+        span.addEventListener('click', function () {
+            span.style.color = bottlecolor;
+            span.style.fontFamily = 'tiny280';
+            span.style.fontSize = '15pt';
+            span.style.filter = 'blur(1px)';
+        });
+    });
+
+    clearCanvas(); // 캔버스 초기화
+    addImage(currentBg); // 새 이미지 로드
+}
+
+
+    
+  </script>
+</body>
+</html>

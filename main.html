@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Breath Together</title>
+  <style>
+    /* 웹폰트 임포트 */
+    @font-face {
+      font-family: 'ChainsawCarnage';
+      src: url('font/ChainsawCarnage.ttf') format('truetype');
+    }
+
+    @font-face {
+      font-family: 'Fugue-Regular';
+      src: url('font/Fugue-Regular.ttf') format('truetype');
+    }
+
+    /* 기본 스타일 */
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      background-color: #000DFF;
+      color: white;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .container {
+      text-align: center;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .checkbox-container {
+    	z-index: 2;
+      display: flex;
+      justify-content: center;
+      gap: 70px;
+    }
+
+    /* 커스터마이즈된 체크박스 */
+    .checkbox {
+      display: none;
+    }
+
+    .checkbox + label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      color: white;
+      font-family: 'Fugue-Regular', sans-serif;
+      font-size: 2em; /* 텍스트 크기 증가 */
+      position: relative;
+      padding-left: 40px;
+    }
+
+    .checkbox + label span {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: url('white.png') center center/cover no-repeat;
+    }
+
+    .checkbox:checked + label span {
+      background: url('check.png') center center/cover no-repeat;
+    }
+
+    /* 타이틀 */
+    .main-title {
+    	z-index: 1;
+      font-family: 'ChainsawCarnage', sans-serif;
+      font-size: 7em; /* 타이틀 크기 증가 */
+      margin: 70px 0;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+      text-align: center;
+    }
+
+ .about-text {
+      display: none;
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Fugue-Regular', sans-serif;
+      font-size: 1.8em;
+      text-align: center;
+    }
+
+    .about-text.active {
+      display: block;
+    }
+
+
+    /* Play 이미지 */
+    .play-images {
+      z-index: 5;
+      align-items: center;
+      display: none;
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      gap: 50px;
+    }
+
+    .play-images.active {
+      display: flex;
+    }
+
+    .play-images img {
+      width: 500px; /* 이미지 크기 증가 */
+      height: auto;
+    }
+
+    /* Breath 배경 */
+    .breath-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      transition: background 0.3s ease;
+     
+    }
+
+    .breath-background.active {
+      background: url('image/download.gif') center center/cover;
+    }
+
+    /* Contact 정보 */
+    .contact-info {
+      display: none;
+      font-size: 1.2em;
+      position: absolute;
+      top: 20px;
+      left: 20px;
+    }
+
+    .contact-info.active {
+      display: block;
+    }
+
+    /* Main 이미지 */
+    .image-container {
+    	position: relative;
+    	z-index: 1;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .main-image {
+    margin-top: 100px;
+      width: 1300px; /* 이미지 크기 축소 */
+      height: auto;
+    }
+
+.contact-box {
+	z-index: 10;
+      position: absolute;
+      display: none;
+      padding: 30px 20px;
+      background: white;
+      border: 8px solid black;
+      color: #000DFF;
+      font-family: 'Fugue-Regular', sans-serif;
+      font-size: 2em;
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+      cursor: grab;
+    }
+
+    .contact-box.active {
+      display: block;
+    }
+
+    /* 초기 위치 설정 */
+    #nameBox {
+      top: 200px;
+      left: 800px;
+    }
+
+    #handleBox {
+      top: 400px;
+      left: 100px;
+.pupil {
+      position: absolute;
+      width: 20px; /* 눈동자 크기 */
+      height: 20px;
+      background: black;
+      border-radius: 50%;
+      z-index: 2;
+    }
+
+    #leftEye {
+      top: 45%; /* 눈 위치 조정 */
+      left: 47%; /* 눈 위치 조정 */
+    }
+
+    #rightEye {
+      top: 45%; /* 눈 위치 조정 */
+      left: 53%; /* 눈 위치 조정 */
+    }
+
+  </style>
+</head>
+<body>
+  <!-- 컨테이너 -->
+  <div class="container">
+    <!-- 체크박스 컨트롤 -->
+    <div class="checkbox-container">
+      <input type="checkbox" id="about" class="checkbox">
+      <label for="about"><span></span>About</label>
+
+      <input type="checkbox" id="play" class="checkbox">
+      <label for="play"><span></span>Play</label>
+
+      <input type="checkbox" id="breath" class="checkbox">
+      <label for="breath"><span></span>Breath</label>
+
+      <input type="checkbox" id="contact" class="checkbox">
+      <label for="contact"><span></span>Contact</label>
+    </div>
+
+    <!-- 타이틀 -->
+    <h1 class="main-title">Breath Together</h1>
+
+    <!-- About 텍스트 -->
+    <div id="about-text" class="about-text">
+      Having a hard day? Breath together!
+    </div>
+
+    <!-- Play 이미지 -->
+    <div id="play-images" class="play-images">
+      <img src="image/fri.gif" alt="fri">
+        <a href="clean.html"><img src="image/toolkit.png" alt="toolkit"></a>
+      <img src="image/gyul.gif" alt="gyul">
+    </div>
+
+    <!-- 배경 -->
+    <div id="breath-background" class="breath-background"></div>
+
+    <!-- Main 이미지 -->
+    <div class="image-container">
+      <img src="0.svg" alt="Main" class="main-image">
+        <div class="pupil" id="leftEye"></div>
+  <div class="pupil" id="rightEye"></div>
+    </div>
+
+  </div>
+
+
+ <div class="contact-box" id="nameBox">2024&copy;SEOYOUNG KOH</div>
+  <div class="contact-box" id="handleBox">@GOSEOZERO</div>
+
+  <script>
+    // 체크박스 동작 처리
+    document.getElementById('about').addEventListener('change', function () {
+      document.getElementById('about-text').classList.toggle('active', this.checked);
+    });
+
+    document.getElementById('play').addEventListener('change', function () {
+      document.getElementById('play-images').classList.toggle('active', this.checked);
+    });
+
+    document.getElementById('breath').addEventListener('change', function () {
+      const body = document.body;
+      if (this.checked) {
+        body.style.background = "url('green.gif') center center/cover no-repeat";
+      } else {
+        body.style.background = "#000DFF";
+      }
+    });
+    document.getElementById('contact').addEventListener('change', function () {
+      const nameBox = document.getElementById('nameBox');
+      const handleBox = document.getElementById('handleBox');
+      if (this.checked) {
+        nameBox.classList.add('active');
+        handleBox.classList.add('active');
+      } else {
+        nameBox.classList.remove('active');
+        handleBox.classList.remove('active');
+      }
+    });
+
+    // 드래그 기능 추가
+    function makeDraggable(element) {
+      let isDragging = false;
+      let offsetX, offsetY;
+
+      element.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - element.offsetLeft;
+        offsetY = e.clientY - element.offsetTop;
+        element.style.cursor = 'grabbing';
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+          element.style.left = `${e.clientX - offsetX}px`;
+          element.style.top = `${e.clientY - offsetY}px`;
+        }
+      });
+
+      document.addEventListener('mouseup', () => {
+        isDragging = false;
+        element.style.cursor = 'grab';
+      });
+    }
+
+    // 드래그 가능한 요소 지정
+    makeDraggable(document.getElementById('nameBox'));
+    makeDraggable(document.getElementById('handleBox'));
+
+
+    // 눈 움직임 함수
+    function makeEyeFollowCursor(pupil, xOffset, yOffset) {
+      const eyeCenterX = window.innerWidth * xOffset;
+      const eyeCenterY = window.innerHeight * yOffset;
+
+      const pupilMovementRange = 10; // 눈동자가 움직일 수 있는 최대 거리
+
+      document.addEventListener('mousemove', (e) => {
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+
+        // 마우스와 눈 중심 사이의 각도 계산
+        const angle = Math.atan2(mouseY - eyeCenterY, mouseX - eyeCenterX);
+
+        // 눈동자가 이동할 거리
+        const offsetX = Math.cos(angle) * pupilMovementRange;
+        const offsetY = Math.sin(angle) * pupilMovementRange;
+
+        // 눈동자의 위치 업데이트
+        pupil.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+      });
+    }
+
+    // 왼쪽 눈 설정
+    const leftPupil = document.getElementById('leftEye');
+    makeEyeFollowCursor(leftPupil, 0.47, 0.45);
+
+    // 오른쪽 눈 설정
+    const rightPupil = document.getElementById('rightEye');
+    makeEyeFollowCursor(rightPupil, 0.53, 0.45);
+  </script>
+
+  </script>
+</body>
+</html>
+
+
